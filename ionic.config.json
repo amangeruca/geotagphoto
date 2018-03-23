@@ -1,0 +1,8 @@
+{
+  "name": "geotagphoto",
+  "app_id": "2ff45d6d",
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
+}
