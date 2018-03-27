@@ -10,7 +10,6 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-import { PictComp } from '../components/pict/pict';
 import { Camera } from '@ionic-native/camera';
 
 @NgModule({
@@ -18,7 +17,6 @@ import { Camera } from '@ionic-native/camera';
     MyApp,
     AboutPage,
     HomePage,
-    PictComp,
     TabsPage
   ],
   imports: [

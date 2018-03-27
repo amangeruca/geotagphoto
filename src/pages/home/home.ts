@@ -7,6 +7,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera';
   templateUrl: 'home.html'
 })
 export class HomePage {
+  public base64Image: string;
 
   constructor(public navCtrl: NavController, private camera: Camera) {
 
