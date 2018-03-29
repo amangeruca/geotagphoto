@@ -12,6 +12,15 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { Camera } from '@ionic-native/camera';
 import { ImagePicker } from '@ionic-native/image-picker';
+import { SQLite} from '@ionic-native/sqlite';
+import { Toast } from '@ionic-native/toast';
+import { File } from '@ionic-native/file';
+import { Geolocation } from '@ionic-native/geolocation';
+import { FilePath } from '@ionic-native/file-path';
+
+import { Database } from '../providers/database/database'
+import { Util } from '../utils/util/util'
+import { Geoloc } from '../utils/geoloc/geoloc'
 
 @NgModule({
   declarations: [
@@ -36,7 +45,15 @@ import { ImagePicker } from '@ionic-native/image-picker';
     SplashScreen,
     Camera,
     ImagePicker,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    SQLite,
+    Toast,
+    File,
+    Geolocation,
+    FilePath,
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    Database,
+    Util,
+    Geoloc
   ]
 })
 export class AppModule {}
