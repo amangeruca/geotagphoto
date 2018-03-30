@@ -31,22 +31,22 @@ export class Database {
             .catch(e => console.log(e))
     }
 
-    addTagPhoto(photo): void{
+    addTagPhoto(photo): any{
         let sql: string = "INSERT INTO 'tagphotos' VALUES "
                 + "('" + photo.id + "', " +  photo.id_usr 
                 + ", '" + photo.appsrc + "', " + photo.id_album + ", '" + photo.note 
                 + "', '" + photo.datapick + "', " + photo.isstored
                 + ", " + photo.x + ", " + photo.y + ")";
-        this.db.executeSql(sql, {})
-        .then(()=>{console.log("INSERT TAGPHOTO")})
-        .catch(e => console.log(e))
+        return this.db.executeSql(sql, {})
+        // .then(()=>{console.log("INSERT TAGPHOTO")})
+        // .catch(e => console.log(e))
     }
 
-    remTagPhoto(id): void{
+    remTagPhoto(id): any{
         let sql: string = "DELETE FROM 'tagphotos' WHERE "
                         + "id = '" + id + "'";
-        this.db.executeSql(sql, {})
-        .then(()=>{console.log("DELETE TAGPHOTO")})
-        .catch(e => console.log(e))
+        return this.db.executeSql(sql, {})
+        // .then(()=>{console.log("DELETE TAGPHOTO")})
+        // .catch(e => console.log(e))
     }
 }

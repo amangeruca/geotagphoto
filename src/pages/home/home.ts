@@ -19,9 +19,8 @@ export class HomePage {
   arcBtnDisabled: boolean = true;
   syncBtnDisabled: boolean = true;
 
-  private base64Image: string;
+  public base64Image: string;
   private photo: any;
-  private photoFilePath: any;
 
   constructor(public navCtrl: NavController, public platform: Platform, private camera: Camera, private imagePicker: ImagePicker, 
               private db: Database, private util: Util, private file: File, private geoloc: Geoloc, private filepath: FilePath) {
@@ -36,27 +35,58 @@ export class HomePage {
         mediaType: this.camera.MediaType.PICTURE
     };
 
+    const promises = [
+      this.geoloc.getGeoloc(), 
+      this.camera.getPicture(options)
+    ]
+    
     //initialize photo
     this.photo = {}
 
-    //retrive coordinate from gps
-    let coord =  this.getPosition()
-    if (coord) {
-      this.photo.coord = coord;
-    }else{
-      this.util.showToast("It is not possible to get position. Try again");
-      return
-    }
+    //excute all promise and wait they end good
+    Promise.all(promises)
+      .then(promvals => {
+        //get promise then response
+        var coord = promvals[0].coord;
+        var imgdata = promvals[1];
 
-    this.camera.getPicture(options)
-      .then((ImageData) => {
-          this.base64Image = 'data:image/jpeg;base64,' + ImageData;
-          this.setPhotoFilePath(ImageData);
-          this.setDisablePhotoBtn(false);
-        },
-        (err) => {
-          console.log(err);
-        });
+        //save data to photoobject
+        this.photo.coord = coord;
+        this.photo.imgdata = imgdata;
+
+        //add photo to form
+        this.base64Image = 'data:image/jpeg;base64,' + imgdata;
+
+        //new promise to define filepath
+        return this.filepath.resolveNativePath(imgdata);
+      })
+      .then(filePath => {
+        this.setPhotoFilePath(filePath);
+      })
+      .catch( e => {
+          this.util.showToast("Error adding photo: " + e);
+      })
+
+    // //retrive coordinate from gps
+    // let coord =  this.getPosition()
+    // if (coord) {
+    //   this.photo.coord = coord;
+    // }else{
+    //   this.util.showToast("It is not possible to get position. Try again");
+    //   return
+    // }
+
+
+
+    // this.camera.getPicture(options)
+    //   .then((ImageData) => {
+    //       this.base64Image = 'data:image/jpeg;base64,' + ImageData;
+    //       this.setPhotoFilePath(ImageData);
+    //       this.setDisablePhotoBtn(false);
+    //     },
+    //     (err) => {
+    //       console.log(err);
+    //     });
   }
 
   addPicture(){
@@ -64,17 +94,56 @@ export class HomePage {
       maximumImagesCount: 1
     };
 
-    this.imagePicker.getPictures(options)
-      .then((results) => {
-          if(results.length>0) {
-            this.base64Image = 'data:image/jpeg;base64,' + results[0]
-          }else{
-            console.log("errore on imagePicker");
-        }}, 
-        (err) => {
-          console.log(err);
-        }
-    );
+    const promises = [
+      this.geoloc.getGeoloc(), 
+      this.imagePicker.getPictures(options)
+    ]
+    
+    //initialize photo
+    this.photo = {}
+
+    //excute all promise and wait they end good
+    Promise.all(promises)
+      .then(promvals => {
+        //get promise then response
+        var coord = promvals[0].coord;
+        var imgdata = promvals[1][0]
+
+        //save data to photoobject
+        this.photo.coord = coord;
+        this.photo.imgdata = imgdata;
+
+        //add photo to form
+        this.base64Image = 'data:image/jpeg;base64,' + imgdata;
+
+        //new promise to define filepath
+        return this.filepath.resolveNativePath(imgdata);
+      })
+      .then(filePath => {
+        this.setPhotoFilePath(filePath);
+      })
+      .catch( e => {
+          this.util.showToast("Error getting photo from gallery: " + e);
+      })
+
+
+
+
+
+
+
+
+    // this.imagePicker.getPictures(options)
+    //   .then((results) => {
+    //       if(results.length>0) {
+    //         this.base64Image = 'data:image/jpeg;base64,' + results[0]
+    //       }else{
+    //         console.log("errore on imagePicker");
+    //     }}, 
+    //     (err) => {
+    //       console.log(err);
+    //     }
+    // );
 
   }
 
@@ -86,6 +155,8 @@ export class HomePage {
   }
 
   archivePicture(){
+
+
     this.fillPhotoObject();
     this.addPhotoToStore();
     //try to upload//////
@@ -113,13 +184,6 @@ export class HomePage {
 
   }
 
-  getPosition(): any{
-    let resp = this.geoloc.getGeoloc(),
-    coord = resp.coord;
-    return coord;
-
-  }
-
   //create the photo name by the userid e datatime. so il will be unique
   getTagPhotoId(): string{
     let usr: string = '1',
@@ -130,13 +194,13 @@ export class HomePage {
 
   //copy the file into an app directory and store information in db
   addPhotoToStore(){
-    let store_fname = this.photo.id + '.jpg';
-    this.file.copyFile(this.photoFilePath.path, this.photoFilePath.name, this.file.dataDirectory, store_fname)
-      .then(success =>{
-        this.db.addTagPhoto(this.photo);
-      })
-      .catch(e=>console.log(e))
-
+    var store_fname = this.photo.id + '.jpg';
+    this.file.copyFile(this.photo.path, this.photo.name, this.file.dataDirectory, store_fname)
+    .then(success =>{
+        return this.db.addTagPhoto(this.photo);
+    })
+    .then(()=>{this.util.showToast("Photo localy stored");})
+    .catch((e)=>{this.util.showToast("Error storing photo locally: " + e);})
   }
 
   //eneble disable btn on toolbar
@@ -148,19 +212,13 @@ export class HomePage {
   }
 
   //get the path and the name of the photo
-  setPhotoFilePath(imagePath: string){
-    this.filepath.resolveNativePath(imagePath)
-      .then(filePath => {
+  setPhotoFilePath(filePath: string){
         if (this.platform.is('android')){
-          this.photoFilePath.path = filePath.substr(0, filePath.lastIndexOf('/') + 1)
-          this.photoFilePath.name = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
+          this.photo.path = filePath.substr(0, filePath.lastIndexOf('/') + 1)
+          this.photo.name = this.photo.imgdata.substring(this.photo.imgdata.lastIndexOf('/') + 1, this.photo.imgdata.lastIndexOf('?'));
         }else{
-          this.photoFilePath.path = imagePath.substr(imagePath.lastIndexOf('/') + 1);
-          this.photoFilePath.name = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
-        };
-      }, (e)=>{
-          console.log("Error while getting currents path")
-      })
-
+          this.photo.path = this.photo.imgdata.substr(this.photo.imgdata.lastIndexOf('/') + 1);
+          this.photo.name = this.photo.imgdata.substr(0, this.photo.imgdata.lastIndexOf('/') + 1);
+        }
   }
 }

@@ -14,13 +14,8 @@ export class Geoloc {
     }
 
     getGeoloc(): any{
-        this.geolocation.getCurrentPosition(this.options)
-            .then((resp)=>{
-                return resp;
-            })
-            .catch((e)=>{
-                console.log("error on geolocation", e)
-            })
+        return this.geolocation.getCurrentPosition(this.options)
+
     }
 
 }
