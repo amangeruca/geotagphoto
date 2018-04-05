@@ -88,6 +88,8 @@
     <plugin name="cordova-plugin-file" spec="^6.0.1" />
     <plugin name="cordova-plugin-geolocation" spec="^4.0.1" />
     <plugin name="cordova-plugin-filepath" spec="^1.2.0" />
-    <engine name="android" spec="~7.0.0" />
     <allow-navigation href="http://192.168.183.128:8100" />
+    <allow-navigation href="http://192.168.1.201:8100" />
+    <plugin name="cordova-plugin-file-transfer" spec="^1.7.1" />
+    <engine name="android" spec="7.0.0" />
 </widget>

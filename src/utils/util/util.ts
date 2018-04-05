@@ -1,21 +1,44 @@
 import { Injectable } from '@angular/core';
-import { Toast } from '@ionic-native/toast';
+import { ToastController, LoadingController } from 'ionic-angular';
  
 @Injectable()
 export class Util {
 
-    constructor(public toastCtrl: Toast) {
+    constructor(public toast: ToastController, public loadingCtrl: LoadingController) {
     }
 
-    public showToast(txt){
-        this.toastCtrl.show(txt, '5000', 'center');
+    private createToast(txt): any{
+        let toast = this.toast.create({
+            message: txt,
+            position: 'middle',
+            duration: 5000
+        });
+        return toast;
+    }
+
+    public showToast(txt): void{
+        let toast = this.createToast(txt);
+        toast.present();
+    }
+
+    private createLoadingCtrl(): any{
+        let loading = this.loadingCtrl.create({
+            content: 'Please wait...'
+        });
+        return loading;
+    }
+
+    public showLoadingCtrl(): any{
+        let loading = this.createLoadingCtrl();
+        loading.present();
+        return loading;
     }
 
     public getDate(): string{
         let d = new Date(),
         dt = [this.padNumber(d.getFullYear(), 4), this.padNumber(d.getMonth()+1, 2), this.padNumber(d.getDate(), 2)],
         dt_txt = dt.join('/');
-        return dt_txt
+        return dt_txt;
     }
 
     public getDateTime(): string{

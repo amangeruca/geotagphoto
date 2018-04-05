@@ -18,35 +18,53 @@ export class Database {
         this.sqlite.create(this.options)
             .then((db: SQLiteObject)=>{
                 this.db = db;
-                let sql = "CREATE TABLE IF NOT EXISTS 'tagphotos' (\
-                        \ id varchar(50), id_usr int,\
+                let sql = "CREATE TABLE IF NOT EXISTS tagphotos (\
+                        \ id integer primary key, id_user int, imgname varchar(50),\
                         \ appsrc VARCHAR(100), id_album int, note varchar(255),\
                         \ datapick varchar(50),  isstored boolean,\
                         \ x real, y real)";
-                this.db.executeSql(sql, {})
-                .then(()=>{console.log("CREATE TABLE")})
-                .catch(e => console.log(e))
+                return this.db.executeSql(sql, {})
             })
-
-            .catch(e => console.log(e))
+            .then(()=>{
+                console.log("CREATE TABLE")
+            })
+            .catch(e => {
+                console.log(e)
+            })
     }
 
     addTagPhoto(photo): any{
-        let sql: string = "INSERT INTO 'tagphotos' VALUES "
-                + "('" + photo.id + "', " +  photo.id_usr 
-                + ", '" + photo.appsrc + "', " + photo.id_album + ", '" + photo.note 
+        let sql: string = "INSERT INTO tagphotos ("
+                + "id_user, imgname, appsrc, id_album, note, datapick, isstored, x, y) VALUES "
+                + "(" + photo.id_user + ", '" + photo.imgname + "', '" + photo.appsrc
+                + "', " + photo.id_album + ", '" + photo.note 
                 + "', '" + photo.datapick + "', " + photo.isstored
-                + ", " + photo.x + ", " + photo.y + ")";
+                + ", " + photo.coords.latitude + ", " + photo.coords.longitude + ")";
+                
         return this.db.executeSql(sql, {})
         // .then(()=>{console.log("INSERT TAGPHOTO")})
         // .catch(e => console.log(e))
     }
 
+    getTagPhotoNotStored(): any{
+        let sql: string = "SELECT * FROM tagphotos "
+                        + "WHERE isstored = 0";
+        return this.db.executeSql(sql, {})
+
+
+    }
+
     remTagPhoto(id): any{
-        let sql: string = "DELETE FROM 'tagphotos' WHERE "
+        let sql: string = "DELETE FROM tagphotos WHERE "
                         + "id = '" + id + "'";
         return this.db.executeSql(sql, {})
-        // .then(()=>{console.log("DELETE TAGPHOTO")})
-        // .catch(e => console.log(e))
+
+    }
+    
+    setTagPhotoAsStored(id): any{
+        let sql: string = "UPDATE tagphotos SET isstored = 1 WHERE "
+                        + "id = " + id;
+        return this.db.executeSql(sql, {})
+
     }
 }

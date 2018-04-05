@@ -8,7 +8,7 @@ export class Geoloc {
 
     constructor(private geolocation: Geolocation) {
         this.options = {
-            timeout: 60000,
+            timeout: 20000,
             enableHighAccuracy: true
         }
     }
