@@ -146,13 +146,55 @@ export class HomePage {
   }
   
   syncPicture(){
+      var upload_list = [],
+      id_uploaded_list = [];
+
+      //search for record not stored remotly
       this.db.getTagPhotoNotStored()
       .then(res=>{
-          let rows = res.rows;
-          if (rows.length > 0) {
-            this.doSyncPicture(rows);
+        console.log("then 1 sync picture");
+        this.showHideMask();
+
+        let rows = res.rows;
+        if (rows.length > 0) {
+
+          //for every row do the upload by adding then to an array of promise 
+          for(let i = 0; i < rows.length; i++){
+            var item = rows.item(i),
+            item_id = item.id;
+
+            upload_list.push(this.ftrans.upload(item));
+            id_uploaded_list.push(item_id);
           }
+          return Promise.all(upload_list);
+
+        }
+      }, (e)=>{
+          console.log("error get not stored: " + e);
+          throw e;
+          
+      }).
+      then(()=>{
+        console.log("then 2 sync picture");
+        let ids = id_uploaded_list.join();
+        return this.db.setTagPhotoAsStored(ids);
+        
+      }, (e)=>{
+        console.log("error uploading photos: " + e.exception);
+        throw e;
+      
+      }).
+      then(success => {
+        this.showHideMask();
+        this.util.showToast("Photo remotly synchronized");
+
       })
+      .catch((e)=>{
+        this.showHideMask();
+        this.util.showToast("Error storing photo locally: " + e.exception);
+
+      })
+
   }
 
 /////////
@@ -250,40 +292,56 @@ export class HomePage {
 
   }
 
-  doSyncPicture(rows){
-    this.showHideMask();
-    var first_promise_list = [];
-    var id_list = []
-    for(let i = 0; i < rows.length; i++){
-      let item = rows.item(i);
-      id_list.push(item.id);
-      first_promise_list.push(this.ftrans.upload(rows.item(i)));
+  // doSyncPicture(rows){
+  //   var first_promise_list = [];
+  //   var id_list = []
+
+  //   //for every rows upload file and set image to stored
+  //   for(let i = 0; i < rows.length; i++){
+  //     var item = rows.item(i);
+  //     this.ftrans.upload(item)
+  //     .then(()=>{
+  //       console.log("res upload item: " + item.id);
+  //       this.db.setTagPhotoAsStored(item.id);
+
+  //     })
+  //     .catch((e)=>{
+  //       console.log("error upload item: " + item.id);
+  //       throw e;
+
+  //     })
+  //   }
+
+    // for(let i = 0; i < rows.length; i++){
+    //   let item = rows.item(i);
+    //   id_list.push(item.id);
+    //   first_promise_list.push(this.ftrans.upload(rows.item(i)));
  
-    }
+    // }
 
-    Promise.all(first_promise_list)
-    .then(success => {
-      var last_promise_list = []
-      for(let j = 0; j < id_list.length; j++){
-        last_promise_list.push(this.db.setTagPhotoAsStored(id_list[j]));
-      }
-      return Promise.all(last_promise_list);
+    // Promise.all(first_promise_list)
+    // .then(success => {
+    //   var last_promise_list = []
+    //   for(let j = 0; j < id_list.length; j++){
+    //     last_promise_list.push(this.db.setTagPhotoAsStored(id_list[j]));
+    //   }
+    //   return Promise.all(last_promise_list);
 
-    }, (e) => {
-      this.showHideMask();
-      this.util.showToast("Error sync photo remotly: " + e.message);
+    // }, (e) => {
+    //   this.showHideMask();
+    //   this.util.showToast("Error sync photo remotly: " + e.message);
 
-    })
-    .then(success => {
-      this.showHideMask();
-      this.util.showToast("Photo remotly synchronized");
+    // })
+    // .then(success => {
+    //   this.showHideMask();
+    //   this.util.showToast("Photo remotly synchronized");
 
-    })
-    .catch((e)=>{
-      this.showHideMask();
-      this.util.showToast("Error storing photo locally: " + e.message);
+    // })
+    // .catch((e)=>{
+    //   this.showHideMask();
+    //   this.util.showToast("Error storing photo locally: " + e.message);
 
-    })
+    // })
 
-  }
+  // }
 }

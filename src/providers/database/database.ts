@@ -61,9 +61,9 @@ export class Database {
 
     }
     
-    setTagPhotoAsStored(id): any{
+    setTagPhotoAsStored(ids): any{
         let sql: string = "UPDATE tagphotos SET isstored = 1 WHERE "
-                        + "id = " + id;
+                        + "id IN (" + ids + ")";
         return this.db.executeSql(sql, {})
 
     }
