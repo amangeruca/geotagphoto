@@ -3,9 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 
-import { AboutPage } from '../pages/about/about';
+import { ListPage } from '../pages/list/list';
 import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
+import { DetailsPage } from '../pages/details/details';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -17,17 +18,19 @@ import { File } from '@ionic-native/file';
 import { Geolocation } from '@ionic-native/geolocation';
 import { FilePath } from '@ionic-native/file-path';
 import { FileTransfer } from '@ionic-native/file-transfer';
+import { Dialogs } from '@ionic-native/dialogs';
 
 import { Database } from '../providers/database/database';
 import { Util } from '../utils/util/util';
 import { Geoloc } from '../utils/geoloc/geoloc';
-import { Ftrans } from '../utils/ftrans/ftrans'
+import { Ftrans } from '../utils/ftrans/ftrans';
 
 @NgModule({
   declarations: [
     MyApp,
-    AboutPage,
+    ListPage,
     HomePage,
+    DetailsPage,
     TabsPage
   ],
   imports: [
@@ -37,8 +40,9 @@ import { Ftrans } from '../utils/ftrans/ftrans'
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    AboutPage,
+    ListPage,
     HomePage,
+    DetailsPage,
     TabsPage
   ],
   providers: [
@@ -51,6 +55,7 @@ import { Ftrans } from '../utils/ftrans/ftrans'
     Geolocation,
     FilePath,
     FileTransfer,
+    Dialogs,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     Database,
     Util,

@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ToastController, LoadingController } from 'ionic-angular';
+import { Dialogs } from '@ionic-native/dialogs';
  
 @Injectable()
 export class Util {
 
-    constructor(public toast: ToastController, public loadingCtrl: LoadingController) {
+    constructor(public toast: ToastController, public loadingCtrl: LoadingController, public dialog: Dialogs) {
     }
 
     private createToast(txt): any{
@@ -53,6 +54,11 @@ export class Util {
         let s: string = num + "";
         while (s.length < size) s = "0" + s;
         return s; 
+    }
+
+    public showConfirm(msg: string, title: string): any{
+        return this.dialog.confirm(msg, title);
+
     }
 
 }

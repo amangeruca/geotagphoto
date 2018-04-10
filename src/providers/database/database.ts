@@ -40,17 +40,20 @@ export class Database {
                 + "', " + photo.id_album + ", '" + photo.note 
                 + "', '" + photo.datapick + "', " + photo.isstored
                 + ", " + photo.coords.latitude + ", " + photo.coords.longitude + ")";
-                
         return this.db.executeSql(sql, {})
-        // .then(()=>{console.log("INSERT TAGPHOTO")})
-        // .catch(e => console.log(e))
+
+    }
+
+    getTagPhotos(): any {
+        let sql: string = "SELECT * FROM tagphotos";
+        return this.db.executeSql(sql, {})
+
     }
 
     getTagPhotoNotStored(): any{
         let sql: string = "SELECT * FROM tagphotos "
                         + "WHERE isstored = 0";
         return this.db.executeSql(sql, {})
-
 
     }
 

@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Photos Archive
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list>
+    <ion-item-sliding *ngFor="let photo of photos; let i = index">
+      <ion-item id={{photo.id}}>
+        <ion-thumbnail item-start>
+          <img src={{photo.appsrc}}>
+        </ion-thumbnail>
+        <h2>{{photo.imgname}}</h2>
+        <p>{{photo.note}}</p>
+        <p>{{photo.datapick}}</p>
+        <button (click)="viewPositionItem(i)" ion-button large outline clear icon-only item-end>
+            <ion-icon name="arrow-dropright"></ion-icon>
+        </button>
+      </ion-item>
+
+      <ion-item-options side="left">
+        <button (click)="deleteListItem(i)" ion-button color="danger" large outline clear icon-only>
+            <ion-icon name="trash"></ion-icon>
+        </button>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+</ion-content>
