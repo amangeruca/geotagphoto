@@ -28,16 +28,19 @@
     "@ionic-native/file-path": "^4.6.0",
     "@ionic-native/file-transfer": "^4.6.0",
     "@ionic-native/geolocation": "^4.6.0",
+    "@ionic-native/http": "^4.7.0",
     "@ionic-native/image-picker": "^4.6.0",
+    "@ionic-native/secure-storage": "^4.7.0",
     "@ionic-native/splash-screen": "4.5.3",
     "@ionic-native/sqlite": "^4.7.0",
     "@ionic-native/status-bar": "^4.5.3",
     "@ionic-native/toast": "^4.6.0",
     "@ionic/pro": "1.0.20",
-    "@ionic/storage": "2.1.3",
+    "@ionic/storage": "^2.1.3",
     "@types/leaflet": "^1.2.6",
     "com.synconset.imagepicker": "^2.1.10",
     "cordova-android": "7.0.0",
+    "cordova-plugin-advanced-http": "^1.11.1",
     "cordova-plugin-camera": "^4.0.2",
     "cordova-plugin-device": "^2.0.1",
     "cordova-plugin-dialogs": "^2.0.1",
@@ -47,6 +50,7 @@
     "cordova-plugin-geolocation": "^4.0.1",
     "cordova-plugin-ionic-keyboard": "^2.0.5",
     "cordova-plugin-ionic-webview": "^1.1.19",
+    "cordova-plugin-secure-storage": "^2.6.8",
     "cordova-plugin-splashscreen": "^5.0.2",
     "cordova-plugin-statusbar": "^2.4.1",
     "cordova-plugin-telerik-imagepicker": "^2.1.10",
@@ -56,7 +60,7 @@
     "ionic-angular": "3.9.2",
     "ionicons": "3.0.0",
     "leaflet": "^1.3.1",
-    "rxjs": "5.5.7",
+    "rxjs": "^5.5.9",
     "sw-toolbox": "3.6.0",
     "zone.js": "0.8.20"
   },
@@ -81,7 +85,9 @@
       "cordova-plugin-ionic-keyboard": {},
       "cordova-plugin-file-transfer": {},
       "cordova-plugin-dialogs": {},
-      "cordova-plugin-statusbar": {}
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-secure-storage": {},
+      "cordova-plugin-advanced-http": {}
     },
     "platforms": [
       "android"

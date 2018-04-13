@@ -4,6 +4,7 @@ import { Dialogs } from '@ionic-native/dialogs';
  
 @Injectable()
 export class Util {
+    private loadingMask: any;
 
     constructor(public toast: ToastController, public loadingCtrl: LoadingController, public dialog: Dialogs) {
     }
@@ -11,8 +12,8 @@ export class Util {
     private createToast(txt): any{
         let toast = this.toast.create({
             message: txt,
-            position: 'middle',
-            duration: 5000
+            position: 'bottom',
+            duration: 3000
         });
         return toast;
     }
@@ -60,5 +61,16 @@ export class Util {
         return this.dialog.confirm(msg, title);
 
     }
+
+    public showHideMask(){
+        if(!!this.loadingMask){
+          this.loadingMask.dismiss();
+          this.loadingMask = null;
+        }else{
+          this.loadingMask = this.showLoadingCtrl();
+        }
+    
+    }
+    
 
 }

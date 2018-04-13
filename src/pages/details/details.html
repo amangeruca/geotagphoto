@@ -7,9 +7,14 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="container-map">
-        <div id="map" style="width: 100%; height: 100%"></div>
-    </div>
 
+    <div class="container-map"><div id="map" style="width: 100%; height: 100%"></div></div>
+    <ion-item-divider></ion-item-divider>
+    <ion-item>
+      <img [src]="photo.appsrc"/>
+      <h2>{{photo.imgname}}</h2>
+      <p>{{photo.datapick}}</p>
+      <p>{{photo.note}}</p>
+    </ion-item>
 
 </ion-content>

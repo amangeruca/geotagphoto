@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, NavParams, List } from 'ionic-angular';
 import { Database } from '../../providers/database/database'
-import { Util } from '../../utils/util/util'
+import { Util } from '../../providers/util/util'
 import { DetailsPage } from '../details/details';
 
 @Component({

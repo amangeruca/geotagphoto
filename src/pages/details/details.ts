@@ -8,15 +8,12 @@ import L from "leaflet";
   templateUrl: 'details.html'
 })
 export class DetailsPage {
-  private photo: any;
+  private photo: any = {};
   private map: L.Map;
   private center: L.PointTuple;
   private photoLayer: L.Marker;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
-    this.photo = this.navParams.get('photo');
-
-  }
+  constructor(public navCtrl: NavController, public navParams: NavParams) {}
 
 /*
   PAGE EVENT
@@ -24,7 +21,8 @@ export class DetailsPage {
   // uns when the page has loaded. This event only happens once per page being created.
   ionViewDidLoad() {
     console.log('ionViewDidLoad MapPage');
-    this.center = [28.644800, 77.216721];
+    this.photo = this.navParams.data;
+    // this.center = [28.644800, 77.216721];
     this.createLeafletMap();
 
   }

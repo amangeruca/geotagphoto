@@ -93,5 +93,7 @@
     <engine name="android" spec="7.0.0" />
     <plugin name="cordova-plugin-dialogs" spec="^2.0.1" />
     <plugin name="cordova-plugin-statusbar" spec="^2.4.1" />
+    <plugin name="cordova-plugin-advanced-http" spec="^1.11.1" />
+    <plugin name="cordova-plugin-secure-storage" spec="^2.6.8" />
     <plugin name="cordova-sqlite-storage" spec="^2.3.0" />
 </widget>

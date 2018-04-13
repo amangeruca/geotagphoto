@@ -6,9 +6,9 @@ import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
 
 import { Database } from '../../providers/database/database'
-import { Util } from '../../utils/util/util'
-import { Geoloc } from '../../utils/geoloc/geoloc'
-import { Ftrans } from '../../utils/ftrans/ftrans'
+import { Util } from '../../providers/util/util'
+import { Geoloc } from '../../providers/geoloc/geoloc'
+import { DataTrans } from '../../providers/datatrans/datatrans'
 
 @Component({
   selector: 'page-home',
@@ -21,11 +21,10 @@ export class HomePage {
 
   public base64Image: string;
   private photo: any;
-  private loadingMask: any;
 
   constructor(public navCtrl: NavController, public platform: Platform, private camera: Camera, private imagePicker: ImagePicker, 
               private db: Database, private util: Util, private file: File, private geoloc: Geoloc, private filepath: FilePath,
-              private ftrans: Ftrans) {
+              private datatrans: DataTrans) {
 
   }
 
@@ -35,11 +34,12 @@ export class HomePage {
         // destinationType: this.camera.DestinationType.DATA_URL,
         destinationType: this.camera.DestinationType.FILE_URI,
         encodingType: this.camera.EncodingType.JPEG,
-        mediaType: this.camera.MediaType.PICTURE
+        mediaType: this.camera.MediaType.PICTURE,
+        correctOrientation: true
     };
 
     //loading mask
-    this.showHideMask();
+    this.util.showHideMask();
 
     //initialize photo
     this.photo = {};
@@ -73,12 +73,12 @@ export class HomePage {
 
         //enable bottom and hide mask
         this.setDisablePhotoBtn(false);
-        this.showHideMask();
+        this.util.showHideMask();
 
       })
       .catch( e => {
         console.log('promise catch')
-        this.showHideMask();
+        this.util.showHideMask();
         this.util.showToast("Error adding photo: " + e.message);
       
       })
@@ -95,7 +95,7 @@ export class HomePage {
     ]
     
     //loading mask
-    this.showHideMask();
+    this.util.showHideMask();
 
     //initialize photo
     this.photo = {};
@@ -121,11 +121,11 @@ export class HomePage {
       .then(filePath => {
         this.setPhotoFilePath(filePath);
         this.setDisablePhotoBtn(false);
-        this.showHideMask();
+        this.util.showHideMask();
 
       })
       .catch( e => {
-          this.showHideMask();
+          this.util.showHideMask();
           this.util.showToast("Error getting photo from gallery: " + e);
       })
 
@@ -152,7 +152,7 @@ export class HomePage {
       this.db.getTagPhotoNotStored()
       .then(res=>{
         console.log("then 1 sync picture");
-        this.showHideMask();
+        this.util.showHideMask();
 
         let rows = res.rows;
         if (rows.length > 0) {
@@ -162,7 +162,7 @@ export class HomePage {
             var item = rows.item(i),
             item_id = item.id;
 
-            upload_list.push(this.ftrans.upload(item));
+            upload_list.push(this.datatrans.upload(item));
             id_uploaded_list.push(item_id);
           }
           return Promise.all(upload_list);
@@ -184,12 +184,12 @@ export class HomePage {
       
       }).
       then(success => {
-        this.showHideMask();
+        this.util.showHideMask();
         this.util.showToast("Photo remotly synchronized");
 
       })
       .catch((e)=>{
-        this.showHideMask();
+        this.util.showHideMask();
         this.util.showToast("Error storing photo locally: " + e.exception);
 
       })
@@ -226,7 +226,7 @@ export class HomePage {
   addPhotoToStore(){
     console.log(this.photo);
     var rowid: number = null;
-    this.showHideMask();
+    this.util.showHideMask();
     this.file.copyFile(this.photo.path, this.photo.name, this.file.dataDirectory, this.photo.imgname)
     .then(success =>{
         return this.db.addTagPhoto(this.photo);
@@ -238,17 +238,17 @@ export class HomePage {
         let photo = this.photo;
         this.util.showToast("Photo localy stored");
         this.removePicture();
-        return this.ftrans.upload(photo);
+        return this.datatrans.upload(photo);
 
     })
     .then(success=>{
-        this.showHideMask();
+        this.util.showHideMask();
         this.util.showToast("Photo remote stored");
         this.db.setTagPhotoAsStored(rowid);
 
     }, failure=>{
         console.log(failure);
-        this.showHideMask();
+        this.util.showHideMask();
         this.util.showToast("Error storing photo remotly: " + failure.exception);
 
     })
@@ -257,7 +257,7 @@ export class HomePage {
 
     })
     .catch((e)=>{
-        this.showHideMask();
+        this.util.showHideMask();
         this.util.showToast("Error storing photo locally: " + e.message);
 
     })
@@ -280,15 +280,4 @@ export class HomePage {
           this.photo.name = this.photo.imgdata.substr(this.photo.imgdata.lastIndexOf('/') + 1);
         }
   }
-
-  showHideMask(){
-    if(!!this.loadingMask){
-      this.loadingMask.dismiss();
-      this.loadingMask = null;
-    }else{
-      this.loadingMask = this.util.showLoadingCtrl();
-    }
-
-  }
-
 }
