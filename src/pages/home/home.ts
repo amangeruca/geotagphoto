@@ -4,6 +4,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera';
 import { ImagePicker, ImagePickerOptions } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
+import { Diagnostic } from '@ionic-native/diagnostic';
 
 import { Database } from '../../providers/database/database'
 import { Util } from '../../providers/util/util'
@@ -24,8 +25,79 @@ export class HomePage {
 
   constructor(public navCtrl: NavController, public platform: Platform, private camera: Camera, private imagePicker: ImagePicker, 
               private db: Database, private util: Util, private file: File, private geoloc: Geoloc, private filepath: FilePath,
-              private datatrans: DataTrans) {
+              private datatrans: DataTrans, private diagno: Diagnostic) {
 
+  }
+
+  onTakePitcture(){
+    this.checkGpsAvailability()
+      .then(()=>{
+        return this.checkCameraAvailability()
+      })
+      .then(()=> this.takePicture)
+      .catch(e => this.util.showToast(e))
+  }
+
+  onAddPicture(){
+    this.checkGpsAvailability()
+      .then(()=> this.addPicture())
+      .catch(e => this.util.showToast(e))
+  }
+
+  checkCameraAvailability(){
+    this.diagno.isCameraAuthorized()
+      .then((authorized)=>{
+        if(authorized){
+          return Promise.resolve();
+        }
+        else{
+          return this.getCameraAuthorization();
+        }
+      })
+  }
+
+  getCameraAuthorization(){
+    return this.diagno.requestCameraAuthorization()
+      .then((status) => {
+        if (status == this.diagno.permissionStatus.GRANTED){
+          return Promise.resolve();
+        }
+        else {
+          return Promise.reject("Application need camera authorization!");
+        }
+      })
+  }
+
+  checkGpsAvailability(){
+    return this.diagno.isLocationAuthorized()
+    .then((authorized)=>{
+      if(authorized){
+        this.diagno.isGpsLocationAvailable();
+      }
+      else{
+        this.getLocationAuthorization()
+      }
+    })
+    .then((available)=>{
+      if(available){
+        return Promise.resolve();
+      }
+      else{
+        return Promise.reject("Cannot access GPS. Please enable it!");
+      }
+    })
+  }
+
+  getLocationAuthorization(){
+    return this.diagno.requestLocationAuthorization()
+      .then((status) => {
+        if (status == this.diagno.permissionStatus.GRANTED){
+          return this.diagno.isGpsLocationAvailable();
+        }
+        else {
+          return Promise.reject("Impossible to proceed without authorization!");
+        }
+      })
   }
 
   takePicture(){
@@ -130,6 +202,9 @@ export class HomePage {
       })
 
   }
+
+  
+
 
   removePicture(){
     this.base64Image = null;

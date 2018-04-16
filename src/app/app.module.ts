@@ -21,6 +21,7 @@ import { FilePath } from '@ionic-native/file-path';
 import { FileTransfer } from '@ionic-native/file-transfer';
 import { HTTP } from '@ionic-native/http';
 import { Dialogs } from '@ionic-native/dialogs';
+import { Diagnostic } from '@ionic-native/diagnostic';
 // import { SecureStorage } from '@ionic-native/secure-storage';
 
 import { Database } from '../providers/database/database';
@@ -65,6 +66,7 @@ import { AuthManager } from '../providers/auth/auth';
     FileTransfer,
     HTTP,
     Dialogs,
+    Diagnostic,
     // SecureStorage,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     Database,
