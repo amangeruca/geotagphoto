@@ -65,6 +65,7 @@ export class AuthManager {
     }
 
     removeJwt(){
-        return this.store.remove('jwt')
+        return this.store.remove('jwt');
+        
     }
 }

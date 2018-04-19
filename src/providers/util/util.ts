@@ -9,17 +9,28 @@ export class Util {
     constructor(public toast: ToastController, public loadingCtrl: LoadingController, public dialog: Dialogs) {
     }
 
-    private createToast(txt): any{
+    private createToast(txt, styleClass): any{
         let toast = this.toast.create({
             message: txt,
             position: 'bottom',
-            duration: 3000
+            duration: 3000,
+            cssClass: styleClass
         });
         return toast;
     }
 
+    public showToastAlert(txt): void{
+        let toast = this.createToast(txt, "msgAlert");
+        toast.present(); 
+    }
+
+    public showToastWarm(txt): void{
+        let toast = this.createToast(txt, "msgWarm");
+        toast.present(); 
+    }
+
     public showToast(txt): void{
-        let toast = this.createToast(txt);
+        let toast = this.createToast(txt, "");
         toast.present();
     }
 

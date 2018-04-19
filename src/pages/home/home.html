@@ -21,15 +21,13 @@
             <ion-col>
                 <ion-list>
                     <ion-item>
-                        <ion-label>Note</ion-label>
-                        <ion-textarea></ion-textarea>
+                        <ion-label color="primary" >NOTE:</ion-label>
+                        <ion-textarea [(ngModel)]="homeInput.note"></ion-textarea>
                     </ion-item>
                     <ion-item>
-                        <ion-label>Album</ion-label>
-                        <ion-select [(ngModel)]="album" interface="action-sheet">
-                            <ion-option value=1>Rilievi</ion-option>
-                            <ion-option value=2>Manutezione</ion-option>
-                            <ion-option value=99>Altro</ion-option>
+                        <ion-label color="primary">ALBUM:</ion-label>
+                        <ion-select [(ngModel)]="homeInput.album"  interface="action-sheet">
+                            <ion-option *ngFor="let alb of albums" value= "{{alb.id}}">{{alb.descr}}</ion-option>
                         </ion-select>
                     </ion-item>
                 </ion-list>

@@ -5,11 +5,13 @@ import { ImagePicker, ImagePickerOptions } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
 import { Diagnostic } from '@ionic-native/diagnostic';
+import { Storage } from '@ionic/storage'; //remove it if we implement secure storage
 
 import { Database } from '../../providers/database/database'
 import { Util } from '../../providers/util/util'
 import { Geoloc } from '../../providers/geoloc/geoloc'
 import { DataTrans } from '../../providers/datatrans/datatrans'
+import { AlbumsProv } from '../../providers/albums/albums'
 
 @Component({
   selector: 'page-home',
@@ -20,32 +22,46 @@ export class HomePage {
   remBtnDisabled: boolean = true;
   arcBtnDisabled: boolean = true;
 
+  private homeInput: any =  {};
+  public albums: any = [];
   public base64Image: string;
   private photo: any;
 
   constructor(public navCtrl: NavController, public platform: Platform, private camera: Camera, private imagePicker: ImagePicker, 
               private db: Database, private util: Util, private file: File, private geoloc: Geoloc, private filepath: FilePath,
-              private datatrans: DataTrans, private diagno: Diagnostic) {
+              private datatrans: DataTrans, private diagno: Diagnostic, private storage: Storage, private albumprov: AlbumsProv) {
+
+    //connect db album to the post request
+    albumprov.listAlbum.subscribe(
+      data=>{
+        this.fillAlbum(data);
+      }
+    );
+
+    //load stored albums
+    albumprov.checkAlbums();
 
   }
 
-  onTakePitcture(){
+  onTakePicture(){
+    console.log("on take Picture");
     this.checkGpsAvailability()
-      .then(()=>{
-        return this.checkCameraAvailability()
-      })
-      .then(()=> this.takePicture)
-      .catch(e => this.util.showToast(e))
+    // .then(()=>{
+    //   return this.checkCameraAvailability()
+    // })
+    .then(()=> this.takePicture())
+    .catch(e => this.util.showToastAlert(e))
   }
-
+  
   onAddPicture(){
+    console.log("on take Picture");
     this.checkGpsAvailability()
       .then(()=> this.addPicture())
-      .catch(e => this.util.showToast(e))
+      .catch(e => this.util.showToastAlert(e))
   }
 
   checkCameraAvailability(){
-    this.diagno.isCameraAuthorized()
+    return this.diagno.isCameraAuthorized()
       .then((authorized)=>{
         if(authorized){
           return Promise.resolve();
@@ -72,10 +88,10 @@ export class HomePage {
     return this.diagno.isLocationAuthorized()
     .then((authorized)=>{
       if(authorized){
-        this.diagno.isGpsLocationAvailable();
+        return this.diagno.isGpsLocationAvailable();
       }
       else{
-        this.getLocationAuthorization()
+        return this.getLocationAuthorization()
       }
     })
     .then((available)=>{
@@ -151,7 +167,8 @@ export class HomePage {
       .catch( e => {
         console.log('promise catch')
         this.util.showHideMask();
-        this.util.showToast("Error adding photo: " + e.message);
+        let msg = !!e.message ? e.message : e;
+        this.util.showToastAlert("Error adding photo: " + msg);
       
       })
   }
@@ -198,24 +215,27 @@ export class HomePage {
       })
       .catch( e => {
           this.util.showHideMask();
-          this.util.showToast("Error getting photo from gallery: " + e);
+          this.util.showToastAlert("Error getting photo from gallery: " + e.message);
       })
 
   }
 
-  
-
-
   removePicture(){
     this.base64Image = null;
     this.photo = null;
+    this.homeInput =  {};
     this.setDisablePhotoBtn(true);
 
   }
 
   archivePicture(){
-    this.fillPhotoObject();
-    this.addPhotoToStore();
+    this.fillPhotoObject()
+    .then((photo)=>{
+      this.addPhotoToStore(photo);
+    })
+    .catch((e)=>{
+      this.util.showToastAlert("Error when archive picture" + e.exception);
+    })
 
   }
   
@@ -265,28 +285,45 @@ export class HomePage {
       })
       .catch((e)=>{
         this.util.showHideMask();
-        this.util.showToast("Error storing photo locally: " + e.exception);
+        this.util.showToastAlert("Error sync remote store: " + e.exception);
 
       })
 
   }
 
 /////////
-
   fillPhotoObject(){
-    let dt_txt = this.util.getDateTime(),
-    id_user = 1,
-    imgname = id_user + "_" + dt_txt + ".jpg",
-    appsrc = this.file.dataDirectory + imgname;
+    return this.storage.get('jwt')
+      .then((data)=>{
+          if(data){
+              let id_user = data.id_user;
+              return Promise.resolve(id_user);
+          }
+          else{
+              return Promise.reject("Can not get id_user");
+          }
+        })
+      .then((id_user)=>{
+        let dt_txt = this.util.getDateTime(),
+          imgname = id_user + "_" + dt_txt + ".jpg",
+          appsrc = this.file.dataDirectory + imgname,
+          photo = {
+            path: this.photo.path,
+            name: this.photo.name,
+            imgdata: this.photo.imgdata,
+            imgname: imgname,
+            appsrc: appsrc,
+            id_user: id_user,
+            id_album:!!this.homeInput.album ? this.homeInput.album : 0,
+            note: this.homeInput.note,
+            datapick: this.util.getDate(),
+            coords: this.photo.coords,
+            isstored: 0
+          };
 
-    this.photo.id_user = id_user;
-    this.photo.imgname = imgname;
-    this.photo.appsrc = appsrc;
-    this.photo.id_album = 1;
-    this.photo.note = "note";
-    this.photo.datapick = this.util.getDate();
-    this.photo.isstored = 0;
+        return Promise.resolve(photo);
 
+      })
   }
 
   //create the photo name by the userid e datatime. so il will be unique
@@ -298,19 +335,18 @@ export class HomePage {
   }
 
   //copy the file into an app directory and store information in db
-  addPhotoToStore(){
-    console.log(this.photo);
+  addPhotoToStore(photo){
+    console.log(photo);
     var rowid: number = null;
     this.util.showHideMask();
-    this.file.copyFile(this.photo.path, this.photo.name, this.file.dataDirectory, this.photo.imgname)
+    this.file.copyFile(photo.path, photo.name, this.file.dataDirectory, photo.imgname)
     .then(success =>{
-        return this.db.addTagPhoto(this.photo);
+        return this.db.addTagPhoto(photo);
 
     })
     .then(success =>{
         console.log("addTagPhoto Success: " + success)
         rowid = success.insertId;
-        let photo = this.photo;
         this.util.showToast("Photo localy stored");
         this.removePicture();
         return this.datatrans.upload(photo);
@@ -324,7 +360,7 @@ export class HomePage {
     }, failure=>{
         console.log(failure);
         this.util.showHideMask();
-        this.util.showToast("Error storing photo remotly: " + failure.exception);
+        this.util.showToastWarm("Impossible to storephoto remotly: " + failure.message);
 
     })
     .then(success=>{
@@ -333,7 +369,7 @@ export class HomePage {
     })
     .catch((e)=>{
         this.util.showHideMask();
-        this.util.showToast("Error storing photo locally: " + e.message);
+        this.util.showToastAlert("Error storing photo locally: " + e.message);
 
     })
   }
@@ -347,12 +383,17 @@ export class HomePage {
 
   //get the path and the name of the photo
   setPhotoFilePath(filePath){
-        if (this.platform.is('android')){
-          this.photo.path = filePath.substr(0, filePath.lastIndexOf('/') + 1)
-          this.photo.name = this.photo.imgdata.substring(this.photo.imgdata.lastIndexOf('/') + 1, this.photo.imgdata.length);
-        }else{
-          this.photo.path = this.photo.imgdata.substr(0, this.photo.imgdata.lastIndexOf('/') + 1);
-          this.photo.name = this.photo.imgdata.substr(this.photo.imgdata.lastIndexOf('/') + 1);
-        }
+    if (this.platform.is('android')){
+      this.photo.path = filePath.substr(0, filePath.lastIndexOf('/') + 1)
+      this.photo.name = this.photo.imgdata.substring(this.photo.imgdata.lastIndexOf('/') + 1, this.photo.imgdata.length);
+    }else{
+      this.photo.path = this.photo.imgdata.substr(0, this.photo.imgdata.lastIndexOf('/') + 1);
+      this.photo.name = this.photo.imgdata.substr(this.photo.imgdata.lastIndexOf('/') + 1);
+    }
+  }
+
+  //read the remote json and fill the album array
+  fillAlbum(data){
+    this.albums = data;
   }
 }

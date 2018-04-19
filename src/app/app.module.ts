@@ -29,6 +29,7 @@ import { Util } from '../providers/util/util';
 import { Geoloc } from '../providers/geoloc/geoloc';
 import { DataTrans } from '../providers/datatrans/datatrans';
 import { AuthManager } from '../providers/auth/auth';
+import { AlbumsProv } from '../providers/albums/albums';
 // import { SecStorage } from '../providers/securestorage/securestorage';
 
 @NgModule({
@@ -73,6 +74,7 @@ import { AuthManager } from '../providers/auth/auth';
     Util,
     Geoloc,
     AuthManager,
+    AlbumsProv,
     DataTrans
   ]
 })

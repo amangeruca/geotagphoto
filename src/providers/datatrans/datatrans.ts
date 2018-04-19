@@ -10,10 +10,11 @@ import 'rxjs/add/operator/switchMap';
 @Injectable()
 export class DataTrans {
     private ftransObj: FileTransferObject;
-    private url: string = "http://192.168.1.202:8080/g7-web/";
+    private url: string = "http://192.168.1.203:8080/g7-web/";
     private api: any = {
         upload_data: 'AppPhoto_submit',
-        login_submit: 'AppPhoto_login'
+        login_submit: 'AppPhoto_login',
+        get_album: 'AppPhoto_getAlbum',
     };
     
     constructor(private transfer: FileTransfer, public storage: Storage, private http: HTTP) {
@@ -21,36 +22,30 @@ export class DataTrans {
     }
 
     upload(photo): any{
-        let fpath = photo.appsrc
-        let options: FileUploadOptions = {
-            fileName: photo.imgname,
-            params: photo,
-            mimeType: 'multipart/form-data',
-            chunkedMode: true    
-        };
-        return this.ftransObj.upload(fpath, this.url + this.api.upload_data, options);
-
+        let headers = {}
+        return this.defineHeaders(headers)
+            .then((headers)=>{
+                let fpath = photo.appsrc,
+                    options: FileUploadOptions = {
+                        fileName: photo.imgname,
+                        params: photo,
+                        mimeType: 'multipart/form-data',
+                        // chunkedMode: true,
+                        chunkedMode: false,
+                        headers: headers    
+                    };
+                return this.ftransObj.upload(fpath, this.url + this.api.upload_data, options);
+            })
     }
 
-    defineHeaders(){
-        // let headers = new Headers({
-        //     'Accept': 'application/json',
-        //     'Content-Type': 'application/json; charset=utf-8'
-        // });
-
-        let headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json; charset=utf-8'      
-        }
-
+    defineHeaders(headers){
         return this.storage.get('jwt')
         .then((data)=>{
             if(data){
-                headers["id_user"] = data.id_user;
+                headers["id_user"] = (data.id_user).toString();;
                 headers["token"] = data.token;
             }
-            return headers
-
+            return headers;
         })
     }
     
@@ -58,9 +53,20 @@ export class DataTrans {
         return this.post(this.url + this.api.login_submit, data);
     }  
 
+    postGetAlbum(): Observable<any>{
+        return this.post(this.url + this.api.get_album, {})
+            // .subscribe(response=>{
+            //     this.albums.next(response.data);
+            // })
+    }
+
     post(url, data): Observable<any> {
+        let headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json; charset=utf-8'      
+        };
         return Observable
-        .fromPromise(this.defineHeaders())
+        .fromPromise(this.defineHeaders(headers))
         .switchMap((headers) => 
             this.http.post(url, data, headers)
         );

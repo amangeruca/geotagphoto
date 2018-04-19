@@ -17,7 +17,6 @@ import { finalize } from 'rxjs/operators/finalize';
 })
 export class LoginPage {
   loginInput: any = {};
-  private loadingMask: any;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public util: Util, private auth: AuthManager) {
   }
@@ -50,10 +49,10 @@ export class LoginPage {
       msg = 'Login Failed. Check user name and password';
     }
     else{
-      msg = 'Unexpected error: ${error.statusText}'
+      msg = 'Unexpected error: ' + error.statusText;
     }
 
-    this.util.showToast(msg);
+    this.util.showToastWarm(msg);
   }
 
 }

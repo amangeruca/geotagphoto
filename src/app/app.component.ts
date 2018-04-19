@@ -7,6 +7,9 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { LoginPage } from '../pages/login/login';
 
 import { AuthManager } from '../providers/auth/auth'; 
+import { DataTrans } from '../providers/datatrans/datatrans'
+import { AlbumsProv } from '../providers/albums/albums'
+import { Util } from '../providers/util/util'
 
 // import { SecStorage } from '../providers/securestorage/securestorage';
 
@@ -14,9 +17,10 @@ import { AuthManager } from '../providers/auth/auth';
   templateUrl: 'app.html'
 })
 export class MyApp {
+  // rootPage:any = TabsPage;
   rootPage:any = LoginPage;
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, auth: AuthManager) {
+  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, auth: AuthManager, datatrans: DataTrans, albumsprov: AlbumsProv, utils: Util) {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
@@ -32,15 +36,17 @@ export class MyApp {
 
     auth.authUser.subscribe(jwt => {
       if (jwt) {
-        this.rootPage = TabsPage;
+        albumsprov.getAlbum().toPromise()
+          .then(()=> this.rootPage = TabsPage)
+          .catch(()=> utils.showToastAlert("Error getting albums on first login"))
       }
       else{
-        this.rootPage = LoginPage;
+        albumsprov.resetStoredAlbums()
+          .then(()=> this.rootPage = LoginPage)
+
       }
     });
 
     auth.checkLogin();
-
-
   }
 }

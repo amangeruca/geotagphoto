@@ -39,7 +39,7 @@ export class ListPage {
     })
     .catch(e=>{
         console.log("error on get tag photos");
-        this.util.showToast("Error getting photos list: " + e.exception);
+        this.util.showToastAlert("Error getting photos list: " + e.exception);
         
       })
       
